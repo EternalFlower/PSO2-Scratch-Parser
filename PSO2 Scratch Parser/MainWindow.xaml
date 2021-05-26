@@ -6,33 +6,74 @@
         xmlns:local="clr-namespace:PSO2_Scratch_Parser"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" FontSize="45"
-        Background="#FF54567E" FontFamily="Arial Black">
-    <DockPanel>
-        <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem>
-                <TextBlock Name="Status" Text="{Binding appStatus}"/>
-            </StatusBarItem>
-        </StatusBar>
+        Background="#FF54567E" FontFamily="Microsoft JhengHei" FontWeight="Normal">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="20,5,20,5"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Background" Value="#FFC8D1E8"/>
+        </Style>
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="10"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
 
-            <TextBlock x:Name="applicationStatus" Grid.Row="0" Height="50"  Margin="30,0,30,5" Text="{Binding appStatus}" TextWrapping="Wrap" TextAlignment="Center" Foreground="White" FontSize="35"/>
-            <Separator Grid.Row="1"/>
-            <StackPanel Grid.Row="2" Background="#FFA7AAE2" Orientation="Horizontal" >
-                <TextBlock Text="Scratch Source:" Margin="10" FontSize="20" Foreground="#FF080808" VerticalAlignment="Center"/>
-                <Button x:Name="sourceURL" Margin="20,5,20,5" Width="200"  Content="Website(URL)" FontSize="20" Background="#FFC8D1E8"></Button>
-                <Button x:Name="sourceHTML" Margin="20,5,20,5" Width="200" Content="HTML File" FontSize="20" Background="#FFC8D1E8"></Button>
-            </StackPanel>
+    </Window.Resources>
 
-            <!--Button Grid.Row="2"></-->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        </Grid>
-    </DockPanel>
-    
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="4" Text="PSO2 Scratch Parser" TextAlignment="Center" Foreground="White" FontSize="35"/>
+        <Separator Grid.Row="1" Grid.ColumnSpan="4"/>
+
+        <Label x:Name="contentStatus" Grid.Row="2" Grid.ColumnSpan="4" Content="{Binding ContentStatus}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White" FontSize="25" FontWeight="Normal"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Scratch Source:" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Button x:Name="sourceURLBtn"
+                Grid.Row="3" 
+                Grid.Column="1"  
+                Content="Website(URL)" />
+
+        <Button x:Name="sourceHTMLBtn"
+                Grid.Row="3" 
+                Grid.Column="2"  
+                Content="HTML File" />
+
+        <Button x:Name="saveBtn"
+                Grid.Row="4" 
+                Grid.Column="1"  
+                Content="Save"
+                IsEnabled="{Binding Enabled}"/>
+        <Button x:Name="clearBtn"
+                Grid.Row="4" 
+                Grid.Column="2"  
+                Content="Clear"
+                IsEnabled="{Binding Enabled}"/>
+
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Download Images:" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Button x:Name="downloadOriginalImageBtn" 
+                Grid.Row="5" 
+                Grid.Column="1"  
+                Content="Original Names"
+                IsEnabled="{Binding Enabled}"/>
+        <Button x:Name="downloadJPImageBtn"
+                Grid.Row="5" 
+                Grid.Column="2"  
+                Content="JP Names"
+                IsEnabled="{Binding Enabled}"/>
+    </Grid>
+
 </Window>

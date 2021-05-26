@@ -20,16 +20,28 @@ namespace PSO2_Scratch_Parser
     /// </summary>
     public partial class MainWindow : Window
     {
-        public string appStatus { get; set; }
+        public string AppStatus { get; set; }
+        public string ContentStatus { get; set; }
+        private ScratchList ScratchList;
+
+        public bool Enabled { 
+            get {
+                return ScratchList != null && ScratchList.Count != 0;
+            } 
+        }
+
         public MainWindow()
         {
             InitializeComponent();
             this.DataContext = this;
 
-            appStatus = "PSO2 Scratch Parser";
+            ContentStatus = "Status: Nothing";
+            AppStatus = "PSO2 Scratch Parser";
+            
 
             //ScratchList scratchData = ScratchList.parseFromHTMLFile(@"C:\Users\Jimmy\Downloads\AC・SG・FUNスクラッチ _ 『PSO2』アイテムカタログ.html");
             //ScratchList scratchData = ScratchList.parseFromWebsiteURL(@"http://pso2.jp/players/catalog/scratch/ac/20210519/");
+            //ScratchList = scratchData;
         }
     }
 }

@@ -1,19 +1,21 @@
 ﻿using System;
 using HtmlAgilityPack;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Text;
-using System.Text.Unicode;
-using System.Text.Encodings.Web;
 using Newtonsoft.Json;
 
 namespace PSO2_Scratch_Parser
 {
     public class ScratchList
     {
+        public int Count { get
+            {
+                return m_prizeList.Count;
+            } 
+        }
+
         private readonly List<Prize> m_prizeList;
         private readonly string Prize_Url;
         private ScratchList(string url = null) 
