@@ -5,23 +5,54 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json;
+using System.Net;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace PSO2_Scratch_Parser
 {
+    public enum ImageNameOption
+    {
+        Original,
+        Japanese,
+        English
+    }
+
     public class ScratchList
     {
-        public int Count { get
-            {
-                return m_prizeList.Count;
-            } 
-        }
-
         private readonly List<Prize> m_prizeList;
-        private readonly string Prize_Url;
-        private ScratchList(string url = null) 
+        private string Prize_Url = "";
+
+        public ScratchList()
         {
             m_prizeList = new List<Prize>();
+        }
+
+        public void parseFromWebsiteURL(string url)
+        {
+            Clear();
+
             Prize_Url = url;
+            HtmlWeb web = new HtmlWeb() { OverrideEncoding = Encoding.UTF8 };
+            var htmlDoc = web.Load(url);
+            parseHTMLDoc(htmlDoc);
+        }
+
+        public void parseFromHTMLFile(string filename)
+        {
+            Clear();
+
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.Load(filename);
+            parseHTMLDoc(htmlDoc);
+        }
+
+        public int Count
+        {
+            get
+            {
+                return m_prizeList.Count;
+            }
         }
 
         private string GetImageUrl(string rel_url)
@@ -29,11 +60,10 @@ namespace PSO2_Scratch_Parser
             if (String.IsNullOrEmpty(rel_url))
             {
                 return "";
-            } 
+            }
             else if (String.IsNullOrEmpty(Prize_Url))
             {
                 return rel_url;
-                
             }
 
             var uri = new Uri(Prize_Url);
@@ -43,7 +73,6 @@ namespace PSO2_Scratch_Parser
 
         private void parseHTMLDoc(HtmlDocument htmlDoc)
         {
-
             var prizes = htmlDoc.DocumentNode.SelectNodes("//dl[@class='item-list-l']");
 
             foreach (var prize in prizes)
@@ -61,7 +90,7 @@ namespace PSO2_Scratch_Parser
                     var parse_list = new List<PrizeBoxItem>();
                     var prize_contents = prize_list.SelectNodes(".//li");
 
-                    foreach(var item in prize_contents)
+                    foreach (var item in prize_contents)
                     {
                         Match name_match = Regex.Match(item.InnerText, "「(.*?)」");
                         var item_name = name_match.Success ? name_match.Groups?[1].Value : "";
@@ -92,7 +121,7 @@ namespace PSO2_Scratch_Parser
                         Rate = prize_details[1]?.InnerText,
                         Contents = parse_list
                     });
-                } 
+                }
                 else
                 {
                     var item_image = GetImageUrl(prize.SelectSingleNode($".//a[@title='{prize_name}']")?.GetAttributeValue("href", ""));
@@ -109,9 +138,8 @@ namespace PSO2_Scratch_Parser
                     });
                 }
             }
-            Write(@"C:\Users\Jimmy\Desktop\test2.json");
         }
-        
+
         public void Write(string fileName)
         {
             var settings = new JsonSerializerSettings
@@ -122,27 +150,85 @@ namespace PSO2_Scratch_Parser
             var jsonString = JsonConvert.SerializeObject(m_prizeList, settings);
             File.WriteAllText(fileName, jsonString);
         }
-        
-        public static ScratchList parseFromWebsiteURL(string url)
+
+        private async Task DownloadImage(Uri url, string filename)
         {
-            var scratchList = new ScratchList(url);
+            using (WebClient client = new WebClient())
+            {
+                client.DownloadFileCompleted += ((sender, args) =>
+                {
+                    if (args.Cancelled)
+                    {
+                        Trace.WriteLine("File download cancelled.");
+                    }
 
-            HtmlWeb web = new HtmlWeb() { OverrideEncoding = Encoding.UTF8 };
-            var htmlDoc = web.Load(url);
-            scratchList.parseHTMLDoc(htmlDoc);
+                    Trace.WriteLine($"{filename} has been downloaded.");
+                });
+                try
+                {
+                    await client.DownloadFileTaskAsync(url, filename);
+                }
+                catch (Exception)
+                {
+                    Trace.WriteLine($"Failed to download File: {filename} from: {url.AbsoluteUri}");
+                }
 
-            return scratchList;
+            }
         }
 
-        public static ScratchList parseFromHTMLFile(string filename)
+        public async void SaveImages(string directory, ImageNameOption option)
         {
-            var scratchList = new ScratchList();
+            Dictionary<string, string> files = new Dictionary<string, string>();
+            var downloadTasks = new List<Task>();
 
-            var htmlDoc = new HtmlDocument();
-            htmlDoc.Load(filename);
-            scratchList.parseHTMLDoc(htmlDoc);
+            foreach (var prize in m_prizeList)
+            {
+                if (!String.IsNullOrEmpty(prize.Concept_art))
+                {
+                    string imageName = option == ImageNameOption.Original ? prize.Concept_art.Substring(prize.Concept_art.LastIndexOf("/") + 1) : $"{MakeValidFileName(prize.Name_jp)}_concept.jpg";
+                    files.TryAdd(prize.Concept_art, Path.Combine(directory, imageName));
+                }
 
-            return scratchList;
+                if (!String.IsNullOrEmpty(prize.Image_url))
+                {
+                    string imageName = option == ImageNameOption.Original ? prize.Image_url.Substring(prize.Image_url.LastIndexOf("/") + 1) : $"{MakeValidFileName(prize.Name_jp)}.jpg";
+                    files.TryAdd(prize.Image_url, Path.Combine(directory, imageName));
+                }
+
+                if (prize.Contents != null)
+                {
+                    foreach (var item in prize.Contents)
+                    {
+                        if (!String.IsNullOrEmpty(item.Image_url))
+                        {
+                            string imageName = option == ImageNameOption.Original ? item.Image_url.Substring(prize.Image_url.LastIndexOf("/") + 1) : $"{MakeValidFileName(item.Name_jp)}.jpg";
+                            files.TryAdd(item.Image_url, Path.Combine(directory, imageName));
+                        }
+                    }
+                }
+            }
+
+            foreach (var file in files)
+            {
+                downloadTasks.Add(DownloadImage(new Uri(file.Key), file.Value));
+            }
+            await Task.WhenAll(downloadTasks.ToArray());
+
+            Trace.WriteLine("Finish downloading.");
+        }
+
+        public void Clear()
+        {
+            Prize_Url = "";
+            m_prizeList.Clear();
+        }
+
+        private static string MakeValidFileName(string name)
+        {
+            string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()));
+            string invalidRegStr = string.Format(@"([{0}]*\.+$)|([{0}]+)", invalidChars);
+
+            return Regex.Replace(name, invalidRegStr, "_");
         }
     }
 }

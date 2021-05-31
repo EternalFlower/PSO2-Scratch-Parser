@@ -45,35 +45,41 @@
         <Button x:Name="sourceURLBtn"
                 Grid.Row="3" 
                 Grid.Column="1"  
-                Content="Website(URL)" />
+                Content="Website(URL)"
+                Click="parseURLBtn"/>
 
         <Button x:Name="sourceHTMLBtn"
                 Grid.Row="3" 
                 Grid.Column="2"  
-                Content="HTML File" />
+                Content="HTML File"
+                Click="parseHTMLBtn"/>
 
         <Button x:Name="saveBtn"
                 Grid.Row="4" 
                 Grid.Column="1"  
                 Content="Save"
-                IsEnabled="{Binding Enabled}"/>
+                IsEnabled="false"/>
         <Button x:Name="clearBtn"
                 Grid.Row="4" 
                 Grid.Column="2"  
                 Content="Clear"
-                IsEnabled="{Binding Enabled}"/>
+                IsEnabled="false"
+                Click="clearScratchListBtn"/>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Text="Download Images:" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Button x:Name="downloadOriginalImageBtn" 
                 Grid.Row="5" 
                 Grid.Column="1"  
                 Content="Original Names"
-                IsEnabled="{Binding Enabled}"/>
+                IsEnabled="false"
+                Click="downloadImageOriginalNameBtn"/>
+        
         <Button x:Name="downloadJPImageBtn"
                 Grid.Row="5" 
                 Grid.Column="2"  
                 Content="JP Names"
-                IsEnabled="{Binding Enabled}"/>
+                IsEnabled="false"
+                Click="downloadImageJPNameBtn"/>
     </Grid>
 
 </Window>
