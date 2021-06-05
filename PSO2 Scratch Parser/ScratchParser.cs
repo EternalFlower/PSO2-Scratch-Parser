@@ -18,12 +18,12 @@ namespace PSO2_Scratch_Parser
         English
     }
 
-    public class ScratchList
+    public class ScratchParser
     {
         private readonly List<Prize> m_prizeList;
         private string Prize_Url = "";
 
-        public ScratchList()
+        public ScratchParser()
         {
             m_prizeList = new List<Prize>();
         }
@@ -35,6 +35,9 @@ namespace PSO2_Scratch_Parser
             Prize_Url = url;
             HtmlWeb web = new HtmlWeb() { OverrideEncoding = Encoding.UTF8 };
             var htmlDoc = web.Load(url);
+
+            Trace.WriteLine($"Parsing data from ${url}.");
+
             parseHTMLDoc(htmlDoc);
         }
 
@@ -44,6 +47,9 @@ namespace PSO2_Scratch_Parser
 
             var htmlDoc = new HtmlDocument();
             htmlDoc.Load(filename);
+
+            Trace.WriteLine($"Parsing data from ${filename}.");
+
             parseHTMLDoc(htmlDoc);
         }
 
@@ -138,6 +144,8 @@ namespace PSO2_Scratch_Parser
                     });
                 }
             }
+
+            Trace.WriteLine("Finish parsing.");
         }
 
         public void Write(string fileName)
@@ -201,7 +209,7 @@ namespace PSO2_Scratch_Parser
                     {
                         if (!String.IsNullOrEmpty(item.Image_url))
                         {
-                            string imageName = option == ImageNameOption.Original ? item.Image_url.Substring(prize.Image_url.LastIndexOf("/") + 1) : $"{MakeValidFileName(item.Name_jp)}.jpg";
+                            string imageName = option == ImageNameOption.Original ? item.Image_url.Substring(item.Image_url.LastIndexOf("/") + 1) : $"{MakeValidFileName(item.Name_jp)}.jpg";
                             files.TryAdd(item.Image_url, Path.Combine(directory, imageName));
                         }
                     }
@@ -212,6 +220,7 @@ namespace PSO2_Scratch_Parser
             {
                 downloadTasks.Add(DownloadImage(new Uri(file.Key), file.Value));
             }
+
             await Task.WhenAll(downloadTasks.ToArray());
 
             Trace.WriteLine("Finish downloading.");

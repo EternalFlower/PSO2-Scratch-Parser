@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" FontSize="45"
         Background="#FF54567E" FontFamily="Microsoft JhengHei" FontWeight="Normal">
+
     <Window.Resources>
         <Style TargetType="Button">
             <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -14,8 +15,6 @@
             <Setter Property="FontSize" Value="20"/>
             <Setter Property="Background" Value="#FFC8D1E8"/>
         </Style>
-
-
     </Window.Resources>
 
     <Grid>
@@ -39,8 +38,6 @@
         <TextBlock Grid.Row="0" Grid.ColumnSpan="4" Text="PSO2 Scratch Parser" TextAlignment="Center" Foreground="White" FontSize="35"/>
         <Separator Grid.Row="1" Grid.ColumnSpan="4"/>
 
-        <Label x:Name="contentStatus" Grid.Row="2" Grid.ColumnSpan="4" Content="{Binding ContentStatus}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White" FontSize="25" FontWeight="Normal"/>
-
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Scratch Source:" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Button x:Name="sourceURLBtn"
                 Grid.Row="3" 
@@ -58,7 +55,9 @@
                 Grid.Row="4" 
                 Grid.Column="1"  
                 Content="Save"
-                IsEnabled="false"/>
+                IsEnabled="false"
+                Click="saveScratchListBtn"/>
+        
         <Button x:Name="clearBtn"
                 Grid.Row="4" 
                 Grid.Column="2"  
@@ -80,6 +79,21 @@
                 Content="JP Names"
                 IsEnabled="false"
                 Click="downloadImageJPNameBtn"/>
+
+        <TextBox x:Name="TextBoxLog"
+                 Grid.Row="6" 
+                 Grid.ColumnSpan="4" 
+                 TextWrapping="Wrap" 
+                 VerticalScrollBarVisibility="Auto" 
+                 AcceptsReturn="True" 
+                 TextChanged="TextBoxLog_OnTextChanged" 
+                 BorderBrush="#FFD7D7DC" 
+                 BorderThickness="5" 
+                 Background="#FF474857" 
+                 Foreground="White" 
+                 FontSize="16" 
+                 FontFamily="Microsoft Sans Serif" 
+                 IsReadOnly="True" />
     </Grid>
 
 </Window>

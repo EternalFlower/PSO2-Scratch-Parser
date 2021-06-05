@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace PSO2_Scratch_Parser
 {
@@ -22,32 +23,35 @@ namespace PSO2_Scratch_Parser
     {
         public string AppStatus { get; set; }
         public string ContentStatus { get; set; }
-        private readonly ScratchList ScratchList;
+        private readonly ScratchParser ScratchParser;
+        private readonly TextBoxOutput textBoxOutput;
 
         public MainWindow()
         {
             InitializeComponent();
             this.DataContext = this;
 
-            ContentStatus = "Status: Nothing";
             AppStatus = "PSO2 Scratch Parser";
 
-            //ScratchList scratchData = ScratchList.parseFromHTMLFile(@"C:\Users\Jimmy\Downloads\AC・SG・FUNスクラッチ _ 『PSO2』アイテムカタログ.html");
-            //ScratchList scratchData = ScratchList.parseFromWebsiteURL(@"http://pso2.jp/players/catalog/scratch/ac/20210519/");
-            ScratchList = new ScratchList();
+            ScratchParser = new ScratchParser();
+            textBoxOutput = new TextBoxOutput(TextBoxLog);
+            TextWriterTraceListener outputTextListener = new TextWriterTraceListener(textBoxOutput);
+            Trace.Listeners.Add(outputTextListener);
         }
 
         public void parseHTMLBtn(Object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
 
-            openFileDialog.InitialDirectory = "c:\\";
+            openFileDialog.InitialDirectory = Properties.Settings.Default.SelectSourceDirectory;
             openFileDialog.Filter = "HTML files (*.htm,*.html)|*htm;*.html|All files (*.*)|*.*";
 
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                ScratchList.parseFromHTMLFile(openFileDialog.FileName);
+                ScratchParser.parseFromHTMLFile(openFileDialog.FileName);
                 UpdateParseControls();
+
+                Properties.Settings.Default.SelectSourceDirectory = System.IO.Path.GetDirectoryName(openFileDialog.FileName);
             }
         }
 
@@ -63,7 +67,7 @@ namespace PSO2_Scratch_Parser
                     return;
                 }
 
-                ScratchList.parseFromWebsiteURL(askUrlDialogWindow.URL);
+                ScratchParser.parseFromWebsiteURL(askUrlDialogWindow.URL);
                 UpdateParseControls();
             }
         }
@@ -71,12 +75,15 @@ namespace PSO2_Scratch_Parser
         public void saveScratchListBtn(Object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.InitialDirectory = "c:\\";
+            saveFileDialog.InitialDirectory = Properties.Settings.Default.SelectSaveJsonDirectory;
             saveFileDialog.Filter = "JSON (*.json)|*.json|All files (*.*)|*.*";
 
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                ScratchList.Write(saveFileDialog.FileName);
+                ScratchParser.Write(saveFileDialog.FileName);
+                Trace.WriteLine($"Saved parsed data to {saveFileDialog.FileName}.");
+
+                Properties.Settings.Default.SelectSaveJsonDirectory = System.IO.Path.GetDirectoryName(saveFileDialog.FileName);
             }
         }
 
@@ -84,12 +91,15 @@ namespace PSO2_Scratch_Parser
         {
             using (var dialog = new FolderBrowserDialog())
             {
+                dialog.SelectedPath = Properties.Settings.Default.SelectSaveImageDirectory;
+
                 DialogResult result = dialog.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
                     var downloadDirectory = dialog.SelectedPath;
-                    ScratchList.SaveImages(downloadDirectory, ImageNameOption.Original);
-                    System.Windows.Forms.MessageBox.Show("Finish Downloading");
+                    ScratchParser.SaveImages(downloadDirectory, ImageNameOption.Original);
+
+                    Properties.Settings.Default.SelectSaveImageDirectory = dialog.SelectedPath;
                 }
             }
         }
@@ -98,29 +108,44 @@ namespace PSO2_Scratch_Parser
         {
             using (var dialog = new FolderBrowserDialog())
             {
+                dialog.SelectedPath = Properties.Settings.Default.SelectSaveImageDirectory;
+
                 DialogResult result = dialog.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
                     var downloadDirectory = dialog.SelectedPath;
-                    ScratchList.SaveImages(downloadDirectory, ImageNameOption.Japanese);
-                    System.Windows.Forms.MessageBox.Show("Finish Downloading");
+                    ScratchParser.SaveImages(downloadDirectory, ImageNameOption.Japanese);
+
+                    Properties.Settings.Default.SelectSaveImageDirectory = dialog.SelectedPath;
                 }
             }
         }
 
         public void clearScratchListBtn(Object sender, EventArgs e)
         {
-            ScratchList.Clear();
+            ScratchParser.Clear();
             UpdateParseControls();
+            Trace.WriteLine("Clear parsed data.");
         }
 
         public void UpdateParseControls()
         {
-            var isEnabled = ScratchList != null && ScratchList.Count != 0;
+            var isEnabled = ScratchParser != null && ScratchParser.Count != 0;
             downloadJPImageBtn.IsEnabled = isEnabled;
             downloadOriginalImageBtn.IsEnabled = isEnabled;
             saveBtn.IsEnabled = isEnabled;
             clearBtn.IsEnabled = isEnabled;
+        }
+
+        private void TextBoxLog_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBoxLog.ScrollToEnd();
+        }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            Properties.Settings.Default.Save();
         }
     }
 }
