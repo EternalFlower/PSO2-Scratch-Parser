@@ -36,7 +36,7 @@ namespace PSO2_Scratch_Parser
             HtmlWeb web = new HtmlWeb() { OverrideEncoding = Encoding.UTF8 };
             var htmlDoc = web.Load(url);
 
-            Trace.WriteLine($"Parsing data from ${url}.");
+            Trace.WriteLine($"Parsing data from {url}.");
 
             parseHTMLDoc(htmlDoc);
         }
@@ -48,7 +48,7 @@ namespace PSO2_Scratch_Parser
             var htmlDoc = new HtmlDocument();
             htmlDoc.Load(filename);
 
-            Trace.WriteLine($"Parsing data from ${filename}.");
+            Trace.WriteLine($"Parsing data from {filename}.");
 
             parseHTMLDoc(htmlDoc);
         }
@@ -88,6 +88,9 @@ namespace PSO2_Scratch_Parser
                 concept_url = GetImageUrl(concept_url);
 
                 var prize_details = prize.SelectNodes(".//td");
+
+                if (prize_details.Count < 2)
+                    continue;
 
                 var prize_list = prize.SelectSingleNode(".//ul[@class='image']");
 
