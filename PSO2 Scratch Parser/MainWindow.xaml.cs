@@ -39,7 +39,22 @@ namespace PSO2_Scratch_Parser
             Trace.Listeners.Add(outputTextListener);
         }
 
-        public void parseHTMLBtn(Object sender, EventArgs e)
+        private void saveScratchAsJson()
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.InitialDirectory = Properties.Settings.Default.SelectSaveJsonDirectory;
+            saveFileDialog.Filter = "JSON (*.json)|*.json|All files (*.*)|*.*";
+
+            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                ScratchParser.Write(saveFileDialog.FileName);
+                Trace.WriteLine($"Saved parsed data to {saveFileDialog.FileName}.");
+
+                Properties.Settings.Default.SelectSaveJsonDirectory = System.IO.Path.GetDirectoryName(saveFileDialog.FileName);
+            }
+        }
+
+        public void button_ParseHTML(Object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
 
@@ -55,7 +70,7 @@ namespace PSO2_Scratch_Parser
             }
         }
 
-        public void parseURLBtn(Object sender, EventArgs e)
+        public void button_ParseURL(Object sender, EventArgs e)
         {
             AskUrlDialogWindow askUrlDialogWindow = new AskUrlDialogWindow();
 
@@ -72,22 +87,12 @@ namespace PSO2_Scratch_Parser
             }
         }
 
-        public void saveScratchListBtn(Object sender, EventArgs e)
+        public void button_SaveScratchList(Object sender, EventArgs e)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.InitialDirectory = Properties.Settings.Default.SelectSaveJsonDirectory;
-            saveFileDialog.Filter = "JSON (*.json)|*.json|All files (*.*)|*.*";
-
-            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                ScratchParser.Write(saveFileDialog.FileName);
-                Trace.WriteLine($"Saved parsed data to {saveFileDialog.FileName}.");
-
-                Properties.Settings.Default.SelectSaveJsonDirectory = System.IO.Path.GetDirectoryName(saveFileDialog.FileName);
-            }
+            saveScratchAsJson();
         }
 
-        public void downloadImageOriginalNameBtn(Object sender, EventArgs e)
+        public void button_DownloadImageOriginalName(Object sender, EventArgs e)
         {
             using (var dialog = new FolderBrowserDialog())
             {
@@ -104,7 +109,7 @@ namespace PSO2_Scratch_Parser
             }
         }
 
-        public void downloadImageJPNameBtn(Object sender, EventArgs e)
+        public void button_DownloadImageJPName(Object sender, EventArgs e)
         {
             using (var dialog = new FolderBrowserDialog())
             {
@@ -121,7 +126,7 @@ namespace PSO2_Scratch_Parser
             }
         }
 
-        public void clearScratchListBtn(Object sender, EventArgs e)
+        public void button_ClearScratchList(Object sender, EventArgs e)
         {
             ScratchParser.Clear();
             UpdateParseControls();
@@ -135,6 +140,7 @@ namespace PSO2_Scratch_Parser
             downloadOriginalImageBtn.IsEnabled = isEnabled;
             saveBtn.IsEnabled = isEnabled;
             clearBtn.IsEnabled = isEnabled;
+            ExportJsonMenu.IsEnabled = isEnabled;
         }
 
         private void TextBoxLog_OnTextChanged(object sender, TextChangedEventArgs e)
@@ -146,6 +152,16 @@ namespace PSO2_Scratch_Parser
         {
             base.OnClosing(e);
             Properties.Settings.Default.Save();
+        }
+
+        public void menu_Exit(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Application.Current.Shutdown();
+        }
+
+        public void menu_ExportJson(object sender, RoutedEventArgs e)
+        {
+            saveScratchAsJson();
         }
     }
 }

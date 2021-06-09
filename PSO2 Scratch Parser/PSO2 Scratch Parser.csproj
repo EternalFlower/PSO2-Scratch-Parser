@@ -6,6 +6,10 @@
     <RootNamespace>PSO2_Scratch_Parser</RootNamespace>
 	<UseWindowsForms>true</UseWindowsForms>
     <UseWPF>true</UseWPF>
+	<PublishSingleFile>true</PublishSingleFile>
+	<SelfContained>true</SelfContained>
+	<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
