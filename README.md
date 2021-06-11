@@ -1,6 +1,6 @@
 # PSO2-Scratch-Parser (Obsolete) 
 
-# Obsolete with June 9th Website Update
+**Obsolete with June 9th Website Update**
 
 C# Version of Scratch Parser
 
